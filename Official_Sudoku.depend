@@ -1,0 +1,51 @@
+# depslib dependency file v1.0
+1678799225 source:g:\official_sudoku\code\cleanup.cpp
+
+1584205420 source:g:\official_sudoku\main.cpp
+	<iostream>
+
+1681553207 source:g:\official_sudoku\code\main.cpp
+	"Sudoku.h"
+
+1681749114 source:g:\official_sudoku\code\sudokucell.cpp
+	"SudokuCell.h"
+
+1681694237 source:g:\official_sudoku\code\button.cpp
+	"Button.h"
+
+1681554326 g:\official_sudoku\code\button.h
+	<SDL.h>
+
+1681723561 g:\official_sudoku\code\sudoku.h
+	<SDL.h>
+	<iostream>
+	<time.h>
+	"Button.h"
+	"SudokuCell.h"
+	"SudokuGenerator.h"
+
+1681554123 g:\official_sudoku\code\sudokucell.h
+	<SDL.h>
+	<SDL_ttf.h>
+	<iostream>
+	<stdlib.h>
+	"Button.h"
+
+1681554323 g:\official_sudoku\code\sudokugenerator.h
+	<iostream>
+	<stdlib.h>
+	<time.h>
+	"SudokuSolver.h"
+
+1681557649 g:\official_sudoku\code\sudokusolver.h
+	<iostream>
+
+1681750506 source:g:\official_sudoku\code\sudoku.cpp
+	"Sudoku.h"
+
+1681662067 source:g:\official_sudoku\code\sudokugenerator.cpp
+	"SudokuGenerator.h"
+
+1681557653 source:g:\official_sudoku\code\sudokusolver.cpp
+	"SudokuSolver.h"
+

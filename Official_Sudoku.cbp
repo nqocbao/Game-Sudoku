@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Official_Sudoku" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Official_Sudoku" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Official_Sudoku" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="code/Button.cpp" />
+		<Unit filename="code/Button.h" />
+		<Unit filename="code/Sudoku.cpp" />
+		<Unit filename="code/Sudoku.h" />
+		<Unit filename="code/SudokuCell.cpp" />
+		<Unit filename="code/SudokuCell.h" />
+		<Unit filename="code/SudokuGenerator.cpp" />
+		<Unit filename="code/SudokuGenerator.h" />
+		<Unit filename="code/SudokuSolver.cpp" />
+		<Unit filename="code/SudokuSolver.h" />
+		<Unit filename="code/main.cpp" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
