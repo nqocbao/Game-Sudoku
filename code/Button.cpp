@@ -5,7 +5,7 @@ Button::Button()
 	  mTexture(nullptr),
 	  mButtonRect({ 0, 0, 0, 0 }),
 	  mTextureRect({0, 0, 0, 0}),
-	  mMouseOutColour({ 255, 255, 255, SDL_ALPHA_OPAQUE }), // light purple
+	  mMouseOutColour({ 255, 255, 255, SDL_ALPHA_OPAQUE }), // white
 	  mMouseOverMotionColour({ 95, 89, 191, SDL_ALPHA_OPAQUE }),//blue
 	  mMouseDownColour({ 91, 191, 116, SDL_ALPHA_OPAQUE }), // green
 	  mMouseUpColour({ 95, 89, 191, SDL_ALPHA_OPAQUE }), // blue
