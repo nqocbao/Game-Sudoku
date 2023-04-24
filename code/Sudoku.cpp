@@ -1,4 +1,5 @@
 #include "Sudoku.h"
+#include <SDL_image.h>
 using namespace std;
 /*..........................Khởi tạo..........................*/
 Sudoku::Sudoku::Sudoku()
@@ -9,7 +10,7 @@ Sudoku::Sudoku::Sudoku()
 	  mTotalTextures(14), mTextureCache{ NULL },
 	  mFont(NULL), mFontSize(mGridHeight/9),
 	  mTotalCells(81),
-	  mClearColour({ 0, 0, 0, SDL_ALPHA_OPAQUE })
+	  mClearColour({ 50, 50, 50, SDL_ALPHA_OPAQUE }) // xám
 {
 
 }
@@ -222,10 +223,7 @@ void Sudoku::Sudoku::play()
 	time_t startTimeForCheckButton;
 
 	// Timer
-	Uint32 startTime = 0;
-    Uint32 currentTime = 0;
-    Uint32 deltaTime = 0;
-    Uint32 totalSeconds = 0;
+	time_t startTimer=time(NULL);
 
 	while (!stop)
 	{
@@ -275,10 +273,7 @@ void Sudoku::Sudoku::play()
 			generateNewSudoku = false;
 			completed = false;
 			// Reset timer
-            Uint32 startTime = 0;
-            Uint32 currentTime = 0;
-            Uint32 deltaTime = 0;
-            Uint32 totalSeconds = 0;
+            time(&startTimer);
 		}
 		else
         {
@@ -329,7 +324,7 @@ void Sudoku::Sudoku::play()
 		}
 		SDL_RenderClear(mRenderer);
 
-        //j kết xuất các nút với kết cấu của từng ô thành bộ đệm nền
+        // kết xuất các nút với kết cấu của từng ô thành bộ đệm nền
 		for (int cell = 0; cell < mTotalCells; cell++)
 		{
 			mGrid[cell].renderButton(mRenderer);
@@ -349,26 +344,11 @@ void Sudoku::Sudoku::play()
 		mNewButton.renderTexture(mRenderer);
 
 		// tinhs giờ
-        /*startTimer=SDL_GetTicks();
 		time_t difference = time(NULL)-startTimer;
 		tm formattedTime;
 		localtime_s(&formattedTime, &difference);
 		char timer[100];
-		strftime(timer, sizeof(timer), "Time: %H:%M:%S", &formattedTime);*/
-
-		startTime = currentTime;
-        currentTime = SDL_GetTicks();
-        deltaTime = currentTime - startTime;
-        totalSeconds += deltaTime;
-
-        // Tính toán thời gian hiện tại
-        int hours = totalSeconds / 3600000;
-        int minutes = (totalSeconds % 3600000) / 60000;
-        int seconds = ((totalSeconds % 3600000) % 60000) / 1000;
-
-        // Định dạng chuỗi thời gian
-        char timer[100];
-        sprintf(timer, "time: %02d:%02d:%02d", hours, minutes, seconds);
+		strftime(timer, sizeof(timer), "Time: %M:%S", &formattedTime);
 
 		SDL_Texture* timerTexture = NULL;
 		SDL_Color fontColour = { 0, 0, 0, SDL_ALPHA_OPAQUE };
@@ -380,8 +360,10 @@ void Sudoku::Sudoku::play()
 		SDL_DestroyTexture(timerTexture);
 		timerTexture = NULL;
 
+//		SDL_RenderCopy(mRenderer,texture,NULL,NULL);
 		SDL_RenderPresent(mRenderer);
 		SDL_Delay(10);
+
         }
 	}
 	SDL_StopTextInput();
@@ -396,6 +378,7 @@ void Sudoku::Sudoku::close()
 	mRenderer = NULL;
 	mWindow = NULL;
 	TTF_CloseFont(mFont);
+
 	mFont = NULL;
 	SDL_Quit();
 	TTF_Quit();
