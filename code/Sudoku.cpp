@@ -63,17 +63,6 @@ inline int Sudoku::Sudoku::getIndex(int row, int col) const
 	return row * mGridRows + col;
 }
 
-/*void Sudoku::Sudoku::loadPNG(string path,SDL_Renderer* screen)
-{
-    SDL_Texture* new_Texture=NULL;
-    SDL_Texture* load_surface=IMG_Load(path.c_str());
-    if (load_surface!=NULL)
-    {
-        SDL_SetColorKey(load_surface,SDL_TRUE,SDL_MapRGB(load_surface->format,0,0xff,0xff))
-    }
-
-}*/
-
 void Sudoku::Sudoku::loadTexture(SDL_Texture*& texture, const char* text, SDL_Color& fontColour)
 {
 	SDL_Surface* textSurface = TTF_RenderText_Solid(mFont, text, fontColour);
