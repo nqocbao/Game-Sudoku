@@ -1,5 +1,7 @@
 #include "Sudoku.h"
 #include <SDL_image.h>
+#include <SDL_mixer.h>
+
 using namespace std;
 /*..........................Khởi tạo..........................*/
 Sudoku::Sudoku::Sudoku()
@@ -10,7 +12,7 @@ Sudoku::Sudoku::Sudoku()
 	  mTotalTextures(14), mTextureCache{ NULL },
 	  mFont(NULL), mFontSize(mGridHeight/9),
 	  mTotalCells(81),
-	  mClearColour({ 50, 50, 50, SDL_ALPHA_OPAQUE }) // xám
+	  mClearColour({ 0, 191, 255, SDL_ALPHA_OPAQUE })
 {
 
 }
@@ -25,7 +27,7 @@ Sudoku::Sudoku::~Sudoku()
 bool Sudoku::Sudoku::initialiseSDL()
 {
 	bool success = true;
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
 	{
 		cout<<"SDL could not intialise! Error: "<<SDL_GetError()<<endl;
 		success = false;
@@ -60,6 +62,17 @@ inline int Sudoku::Sudoku::getIndex(int row, int col) const
 {
 	return row * mGridRows + col;
 }
+
+/*void Sudoku::Sudoku::loadPNG(string path,SDL_Renderer* screen)
+{
+    SDL_Texture* new_Texture=NULL;
+    SDL_Texture* load_surface=IMG_Load(path.c_str());
+    if (load_surface!=NULL)
+    {
+        SDL_SetColorKey(load_surface,SDL_TRUE,SDL_MapRGB(load_surface->format,0,0xff,0xff))
+    }
+
+}*/
 
 void Sudoku::Sudoku::loadTexture(SDL_Texture*& texture, const char* text, SDL_Color& fontColour)
 {
@@ -101,7 +114,7 @@ void Sudoku::Sudoku::createInterfaceLayout()
 
 	//                     ĐỒNG HỒ TÍNH GIỜ
 	int buttonWidth = mWindowWidth- (mGridWidth + 2 * thickBorder);
-	int buttonHeight = (mWindowHeight - 4 * thickBorder)/3 ;
+	int buttonHeight = (mWindowHeight - 4 * thickBorder)/3-thinBorder;
 
 	int buttonStartRow = thickBorder;
 	int buttonStartCol = mGridWidth+thickBorder/2;
@@ -142,14 +155,15 @@ void Sudoku::Sudoku::createInterfaceLayout()
 	mNewButton.setTexture(mTextureCache[11]);
 	Button* otherButtons[numberOfOtherButtons] = { &mCheckButton, &mNewButton };
     //                  NÚT CHECK
-	buttonWidth = (mWindowWidth- (mGridWidth + 2 * thickBorder))/2;
-    buttonHeight = (mWindowHeight - 4 * thickBorder)/3 ;
-	buttonStartRow =2*thickBorder+ 2*buttonHeight;
-    buttonStartCol= mGridWidth+thinBorder;
+	buttonWidth = mWindowWidth- (mGridWidth + 2 * thickBorder);
+    buttonHeight =(mWindowHeight - 4 * thickBorder)/3-thinBorder;
+	buttonStartRow =2*thickBorder+ buttonHeight;
+    buttonStartCol= mGridWidth+2*thinBorder;
     buttonRect= {buttonStartCol,buttonStartRow,buttonWidth,buttonHeight};
     otherButtons[0]->setButtonRect(buttonRect);
     //                  NÚT NEW
-    buttonStartCol += buttonWidth+thickBorder;
+    buttonStartCol = mGridWidth+thickBorder/2;
+    buttonStartRow =2*thickBorder+ 2*buttonHeight+thickBorder;
     buttonRect= {buttonStartCol,buttonStartRow,buttonWidth,buttonHeight};
     otherButtons[1]->setButtonRect(buttonRect);
 }
@@ -221,12 +235,58 @@ void Sudoku::Sudoku::play()
 	// Timing for check button
 	bool measureTimeForCheckButton = false;
 	time_t startTimeForCheckButton;
+    // Music
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    Mix_Music* music = Mix_LoadMUS("gfx/miusic.mp3");
+    Mix_PlayMusic(music, -1);
+    Mix_Chunk* clickSound = Mix_LoadWAV("gfx/click.wav");
+    Mix_Chunk* wrongSound = Mix_LoadWAV("gfx/wrong.wav");
+    Mix_Chunk* clapSound = Mix_LoadWAV("gfx/clap.wav");
 
 	// Timer
-	time_t startTimer=time(NULL);
+	time_t startTimer;
+
+	IMG_Init(IMG_INIT_PNG);
+	SDL_Surface* menuu=IMG_Load("gfx/menugame.png");
+    SDL_Surface* tutorial=IMG_Load("gfx/helpgame.png");
+    bool hi=false;
 
 	while (!stop)
 	{
+	    SDL_Event melu;
+	    if (!hi)
+        {
+            SDL_Texture* menuuTexture= SDL_CreateTextureFromSurface(mRenderer,menuu);
+            SDL_FreeSurface(menuu);
+            while (!hi)
+            {
+                while (SDL_PollEvent(&melu)!=0)
+                {
+                    if (melu.type ==SDL_QUIT || melu.key.keysym.sym == SDLK_q)
+                    {
+                        stop=true;
+                        hi=true;
+                    }
+                    if (melu.key.keysym.sym == SDLK_SPACE)
+                    {
+                        hi=true;
+                        startTimer=time(NULL);
+                    }
+                    if (melu.key.keysym.sym == SDLK_c)
+                    {
+                        hi=true;
+                        if (startTimer == 0) startTimer=time(NULL);
+                    }
+                    if (melu.key.keysym.sym == SDLK_h)
+                    {
+                        menuuTexture=SDL_CreateTextureFromSurface(mRenderer,tutorial);
+                    }
+                    if (melu.type == SDL_KEYDOWN) Mix_PlayChannel(-1, clickSound, 0);
+                }
+                SDL_RenderCopy(mRenderer,menuuTexture,NULL,NULL);
+                SDL_RenderPresent(mRenderer);
+            }
+        }
 
 		while (SDL_PollEvent(&event) != 0)
 		{
@@ -234,12 +294,18 @@ void Sudoku::Sudoku::play()
 			{
 				stop = true;
 			}
+			if (event.type == SDL_KEYDOWN)
+            {
+                Mix_PlayChannel(-1, clickSound, 0);
+            }
 			if (mCheckButton.getMouseEvent(&event) == ButtonState::BUTTON_MOUSE_DOWN)
 			{
+			    Mix_PlayChannel(-1, clickSound, 0);
 				checkSolution = true;
 			}
 			if (mNewButton.getMouseEvent(&event) == ButtonState::BUTTON_MOUSE_DOWN)
 			{
+			    Mix_PlayChannel(-1, clickSound, 0);
 				generateNewSudoku = true;
 			}
 			for (int cell = 0; cell < mTotalCells; cell++)
@@ -278,36 +344,39 @@ void Sudoku::Sudoku::play()
 		else
         {
             if (checkSolution)
-		{
-			// Check if complete
-			for (int cell = 0; cell < mTotalCells; cell++)
-			{
-				if (!mGrid[cell].isCorrect())
-				{
-					completed = false;
-					break;
-				}
-				completed = true;
-			}
+            {
+                // Check if complete
+                for (int cell = 0; cell < mTotalCells; cell++)
+                    {
+                    if (!mGrid[cell].isCorrect())
+                    {
+                        completed = false;
+                        break;
+                    }
+                    completed = true;
+                }
+                if (completed == false) Mix_PlayChannel(-1, wrongSound, 0);
+                else Mix_PlayChannel(-1,clapSound,0);
+                // đặt cờ đo thời gian và thời gian bắt đầu
+                measureTimeForCheckButton = true;
+                time(&startTimeForCheckButton);
 
-			// đặt cờ đo thời gian và thời gian bắt đầu
-			measureTimeForCheckButton = true;
-			time(&startTimeForCheckButton);
-
-			checkSolution = false;
-		}
-		if (measureTimeForCheckButton)
-		{
-			int seconds = 2;
-			if (difftime(time(NULL), startTimeForCheckButton) < seconds && completed)
-			{
-				// Set colour -> green
-				SDL_Color colour = { 91, 191, 116, SDL_ALPHA_OPAQUE };
-				SDL_SetRenderDrawColor(mRenderer, colour.r, colour.g, colour.b, SDL_ALPHA_OPAQUE);
-				mCheckButton.setTexture(mTextureCache[13]);
-				mCheckButton.setMouseDownColour(colour);
-			}
-			else if (difftime(time(NULL), startTimeForCheckButton) < seconds && !completed)
+                checkSolution = false;
+            }
+            if (measureTimeForCheckButton)
+            {
+                int seconds;
+                if (completed == false) seconds = 1;
+                else seconds = 6;
+                if (difftime(time(NULL), startTimeForCheckButton) < seconds && completed)
+                {
+                    // Set colour -> green
+                    SDL_Color colour = { 91, 191, 116, SDL_ALPHA_OPAQUE };
+                    SDL_SetRenderDrawColor(mRenderer, colour.r, colour.g, colour.b, SDL_ALPHA_OPAQUE);
+                    mCheckButton.setTexture(mTextureCache[13]);
+                    mCheckButton.setMouseDownColour(colour);
+                }
+                else if (difftime(time(NULL), startTimeForCheckButton) < seconds && !completed)
                  {
                     // Set colour -> red
                      SDL_Color colour = { 200, 73, 46, SDL_ALPHA_OPAQUE };
@@ -316,57 +385,62 @@ void Sudoku::Sudoku::play()
                      mCheckButton.setMouseDownColour(colour);
                  }
                  else measureTimeForCheckButton = false;
-		}
-		else
-		{
-			mCheckButton.setTexture(mTextureCache[10]);
-			SDL_SetRenderDrawColor(mRenderer, mClearColour.r, mClearColour.g, mClearColour.b, mClearColour.a);
-		}
-		SDL_RenderClear(mRenderer);
+            }
+            else
+            {
+                mCheckButton.setTexture(mTextureCache[10]);
+                SDL_SetRenderDrawColor(mRenderer, mClearColour.r, mClearColour.g, mClearColour.b, mClearColour.a);
+            }
+            SDL_RenderClear(mRenderer);
 
-        // kết xuất các nút với kết cấu của từng ô thành bộ đệm nền
-		for (int cell = 0; cell < mTotalCells; cell++)
-		{
-			mGrid[cell].renderButton(mRenderer);
-			// căn chỉnh lại chính giữa từng ô vì sized của số có thể khác
-			mGrid[cell].centerTextureRect();
-			mGrid[cell].renderTexture(mRenderer);
-		}
+            // kết xuất các nút với kết cấu của từng ô thành bộ đệm nền
+            for (int cell = 0; cell < mTotalCells; cell++)
+            {
+                mGrid[cell].renderButton(mRenderer);
+                // căn chỉnh lại chính giữa từng ô vì sized của số có thể khác
+                mGrid[cell].centerTextureRect();
+                mGrid[cell].renderTexture(mRenderer);
+            }
 
-		// render check button
-		mCheckButton.renderButton(mRenderer);
-		mCheckButton.centerTextureRect();
-		mCheckButton.renderTexture(mRenderer);
+            // render check button
+            mCheckButton.renderButton(mRenderer);
+            mCheckButton.centerTextureRect();
+            mCheckButton.renderTexture(mRenderer);
 
-		// render new button
-		mNewButton.renderButton(mRenderer);
-		mNewButton.centerTextureRect();
-		mNewButton.renderTexture(mRenderer);
+            // render new button
+            mNewButton.renderButton(mRenderer);
+            mNewButton.centerTextureRect();
+            mNewButton.renderTexture(mRenderer);
 
-		// tinhs giờ
-		time_t difference = time(NULL)-startTimer;
-		tm formattedTime;
-		localtime_s(&formattedTime, &difference);
-		char timer[100];
-		strftime(timer, sizeof(timer), "Time: %M:%S", &formattedTime);
+            //render high button
+            mHighScore.renderButton(mRenderer);
+            mHighScore.centerTextureRect();
+            mHighScore.renderTexture(mRenderer);
 
-		SDL_Texture* timerTexture = NULL;
-		SDL_Color fontColour = { 0, 0, 0, SDL_ALPHA_OPAQUE };
-		loadTexture(timerTexture, timer, fontColour);
-		mTimer.setTexture(timerTexture);
-		mTimer.renderButton(mRenderer);
-		mTimer.centerTextureRect();
-		mTimer.renderTexture(mRenderer);
-		SDL_DestroyTexture(timerTexture);
-		timerTexture = NULL;
+            // tinhs giờ
+            time_t difference = time(NULL)-startTimer;
+            tm formattedTime;
+            localtime_s(&formattedTime, &difference);
+            char timer[100];
+            strftime(timer, sizeof(timer), "time: %M:%S", &formattedTime);
 
-//		SDL_RenderCopy(mRenderer,texture,NULL,NULL);
-		SDL_RenderPresent(mRenderer);
-		SDL_Delay(10);
+            SDL_Texture* timerTexture = NULL;
+            SDL_Color fontColour = { 0, 0, 0, SDL_ALPHA_OPAQUE };
+            loadTexture(timerTexture, timer, fontColour);
+            mTimer.setTexture(timerTexture);
+            mTimer.renderButton(mRenderer);
+            mTimer.centerTextureRect();
+            mTimer.renderTexture(mRenderer);
+            SDL_DestroyTexture(timerTexture);
+            timerTexture = NULL;
+
+            SDL_RenderPresent(mRenderer);
+            SDL_Delay(10);
 
         }
 	}
 	SDL_StopTextInput();
+	Mix_FreeMusic(music);
 	freeTextures();
 	close();
 }
@@ -378,7 +452,6 @@ void Sudoku::Sudoku::close()
 	mRenderer = NULL;
 	mWindow = NULL;
 	TTF_CloseFont(mFont);
-
 	mFont = NULL;
 	SDL_Quit();
 	TTF_Quit();
