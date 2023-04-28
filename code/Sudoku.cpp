@@ -401,11 +401,6 @@ void Sudoku::Sudoku::play()
             mNewButton.centerTextureRect();
             mNewButton.renderTexture(mRenderer);
 
-            //render high button
-            mHighScore.renderButton(mRenderer);
-            mHighScore.centerTextureRect();
-            mHighScore.renderTexture(mRenderer);
-
             // tinhs giờ
             time_t difference = time(NULL)-startTimer;
             tm formattedTime;
