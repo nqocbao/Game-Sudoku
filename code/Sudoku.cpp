@@ -239,6 +239,7 @@ void Sudoku::Sudoku::play()
 	SDL_Surface* menuu=IMG_Load("gfx/menugame.png");
     SDL_Surface* tutorial=IMG_Load("gfx/helpgame.png");
     bool hi=false;
+    int them=0;
 
 	while (!stop)
 	{
@@ -327,6 +328,7 @@ void Sudoku::Sudoku::play()
 			}
 			generateNewSudoku = false;
 			completed = false;
+			them = 0;
 			// Reset timer
             time(&startTimer);
 		}
@@ -344,7 +346,11 @@ void Sudoku::Sudoku::play()
                     }
                     completed = true;
                 }
-                if (completed == false) Mix_PlayChannel(-1, wrongSound, 0);
+                if (completed == false)
+                {
+                    Mix_PlayChannel(-1, wrongSound, 0);
+                    them += 3;
+                }
                 else Mix_PlayChannel(-1,clapSound,0);
                 // đặt cờ đo thời gian và thời gian bắt đầu
                 measureTimeForCheckButton = true;
@@ -402,7 +408,7 @@ void Sudoku::Sudoku::play()
             mNewButton.renderTexture(mRenderer);
 
             // tinhs giờ
-            time_t difference = time(NULL)-startTimer;
+            time_t difference = time(NULL)-startTimer+them;
             tm formattedTime;
             localtime_s(&formattedTime, &difference);
             char timer[100];
